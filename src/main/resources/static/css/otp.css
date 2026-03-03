@@ -1,0 +1,88 @@
+/* ===== BACKGROUND ===== */
+body.bank-bg {
+  background: linear-gradient(135deg, #0d6efd, #20c997);
+  font-family: "Segoe UI", sans-serif;
+}
+
+/* ===== CARD ===== */
+.login-card {
+  width: 100%;
+  max-width: 380px;
+  border-radius: 18px;
+  background: #ffffff;
+  animation: fadeScale 0.6s ease;
+}
+
+/* ===== ANIMATION ===== */
+@keyframes fadeScale {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* ===== HEADINGS ===== */
+.login-card h3 {
+  font-weight: 700;
+}
+
+.login-card p {
+  font-size: 0.9rem;
+}
+
+/* ===== INPUTS ===== */
+.form-control {
+  border-radius: 12px;
+  padding: 12px;
+  font-size: 0.95rem;
+  border: 1px solid #ddd;
+  transition: 0.3s;
+}
+
+.form-control:focus {
+  border-color: #198754;
+  box-shadow: 0 0 0 0.15rem rgba(25,135,84,0.25);
+}
+
+/* ===== OTP INPUT SPECIAL ===== */
+#otp {
+  text-align: center;
+  letter-spacing: 6px;
+  font-size: 1.3rem;
+  font-weight: bold;
+}
+
+/* ===== BUTTONS ===== */
+.btn-success {
+  border-radius: 12px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  transition: 0.3s;
+}
+
+.btn-success:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(25,135,84,0.4);
+}
+
+/* ===== TIMER ===== */
+#timer {
+  font-size: 1.1rem;
+}
+
+/* ===== RESEND BUTTON ===== */
+#resendOtpBtn {
+  border-radius: 20px;
+  padding: 6px 16px;
+  transition: 0.3s;
+}
+
+#resendOtpBtn:not(:disabled):hover {
+  background: #0d6efd;
+  color: #fff;
+  box-shadow: 0 4px 12px rgba(13,110,253,0.4);
+}

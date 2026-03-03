@@ -1,0 +1,317 @@
+/* ---------- Global Reset ---------- 
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+/* ---------- Background with Image ---------- 
+.bank-bg {
+  min-height: 100vh;
+  background: 
+    url('../image/bg.jpg') no-repeat center center / cover; 
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+}
+
+
+/* soft animated blobs *
+.bank-bg::before,
+.bank-bg::after {
+  content: "";
+  position: absolute;
+  width: 380px;
+  height: 380px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.12);
+  filter: blur(80px);
+}
+
+.bank-bg::before {
+  top: -120px;
+  left: -120px;
+}
+
+.bank-bg::after {
+  bottom: -120px;
+  right: -120px;
+}
+
+/* ---------- Login Card (Glass Effect) ---------- *
+.login-card {
+  width: 100%;
+  max-width: 420px;
+  padding: 2.2rem;
+  background: rgba(255, 255, 255, 0.92);
+  border-radius: 18px;
+  backdrop-filter: blur(12px);
+  box-shadow:
+    0 25px 50px rgba(0, 0, 0, 0.25),
+    inset 0 1px 0 rgba(255, 255, 255, 0.6);
+  animation: cardFade 0.7s ease;
+  z-index: 1;
+}
+
+/* ---------- Headings ---------- 
+.login-card h2 {
+  font-size: 1.7rem;
+  color: #0d6efd;
+}
+
+.login-card p {
+  font-size: 0.95rem;
+  color: #6c757d;
+}
+
+/* ---------- Form Labels ---------- 
+.form-label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #495057;
+}
+
+/* ---------- Inputs ---------- 
+.form-control {
+  border-radius: 12px;
+  padding: 12px 14px;
+  border: 1px solid #dee2e6;
+  background-color: #f8f9fa;
+  transition: all 0.25s ease;
+}
+
+.form-control::placeholder {
+  color: #adb5bd;
+}
+
+.form-control:focus {
+  background-color: #ffffff;
+  border-color: #0d6efd;
+  box-shadow: 0 0 0 4px rgba(13, 110, 253, 0.18);
+}
+
+/* ---------- Login Button ---------- 
+.btn-primary {
+  margin-top: 0.5rem;
+  border-radius: 14px;
+  padding: 12px;
+  font-weight: 600;
+  font-size: 0.95rem;
+  letter-spacing: 0.4px;
+  background: linear-gradient(135deg, #0d6efd, #084298);
+  border: none;
+  transition: all 0.25s ease;
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 20px rgba(13, 110, 253, 0.35);
+}
+
+/* ---------- Signup Link ---------- 
+.login-card a {
+  color: #0d6efd;
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.login-card a:hover {
+  text-decoration: underline;
+}
+
+/* ---------- Animation ---------- 
+@keyframes cardFade {
+  from {
+    opacity: 0;
+    transform: translateY(30px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* ---------- Mobile ---------- 
+@media (max-width: 480px) {
+  .login-card {
+    padding: 1.8rem;
+    border-radius: 16px;
+  }
+
+  .login-card h2 {
+    font-size: 1.5rem;
+  }
+}
+*/
+
+/* ---------- Global Reset ---------- */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+/* ---------- Background with Image + Overlay ---------- */
+.bank-bg {
+  min-height: 100vh;
+  background: 
+    linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.3)),
+    url('../image/bg.jpg') no-repeat center center / cover;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+}
+
+/* ---------- Soft animated blobs ---------- */
+.bank-bg::before,
+.bank-bg::after {
+  content: "";
+  position: absolute;
+  width: 400px;
+  height: 400px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.12);
+  filter: blur(90px);
+  animation: floatBlob 8s ease-in-out infinite alternate;
+}
+
+.bank-bg::before {
+  top: -150px;
+  left: -150px;
+}
+
+.bank-bg::after {
+  bottom: -150px;
+  right: -150px;
+}
+
+@keyframes floatBlob {
+  0% { transform: translateY(0) rotate(0deg); }
+  50% { transform: translateY(25px) rotate(45deg); }
+  100% { transform: translateY(0) rotate(0deg); }
+}
+
+/* ---------- Login Card (Glass Effect) ---------- */
+.login-card {
+  width: 100%;
+  max-width: 480px;
+  padding: 3rem;
+  background: rgba(255, 255, 255, 0.87);
+  border-radius: 24px;
+  backdrop-filter: blur(16px);
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.28);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  animation: cardFade 0.7s ease;
+  z-index: 1;
+  text-align: center;
+}
+
+/* ---------- Headings ---------- */
+.login-card h2 {
+  font-size: 2rem;
+  color: #0d6efd;
+  margin-bottom: 0.6rem;
+}
+
+.login-card p {
+  font-size: 1rem;
+  color: #6c757d;
+  margin-bottom: 2rem;
+}
+
+/* ---------- Form Labels ---------- */
+.form-label {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #495057;
+  display: block;
+  margin-bottom: 0.4rem;
+}
+
+/* ---------- Inputs ---------- */
+.form-control {
+  width: 100%;
+  border-radius: 14px;
+  padding: 15px 16px;
+  border: 1px solid rgba(255,255,255,0.5);
+  background-color: rgba(255,255,255,0.92);
+  font-size: 1rem;
+  transition: all 0.3s ease;
+}
+
+.form-control::placeholder {
+  color: #adb5bd;
+}
+
+.form-control:focus {
+  background-color: rgba(255,255,255,1);
+  border-color: #0d6efd;
+  box-shadow: 0 0 20px rgba(13,110,253,0.35);
+  outline: none;
+}
+
+/* ---------- Login Button ---------- */
+.btn-primary {
+  margin-top: 1rem;
+  border-radius: 18px;
+  padding: 15px;
+  font-weight: 600;
+  font-size: 1rem;
+  background: linear-gradient(135deg, #0d6efd, #084298);
+  border: none;
+  box-shadow: 0 6px 18px rgba(13,110,253,0.25);
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.btn-primary:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 30px rgba(13,110,253,0.45);
+}
+
+/* ---------- Signup Link ---------- */
+.login-card a {
+  color: #0d6efd;
+  text-decoration: none;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.login-card a:hover {
+  text-decoration: underline;
+}
+
+/* ---------- Animation ---------- */
+@keyframes cardFade {
+  from { opacity: 0; transform: translateY(-60px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ---------- Media Query: Mobile ---------- */
+@media (max-width: 480px) {
+  .login-card {
+    max-width: 95%;
+    padding: 2rem;
+    border-radius: 16px;
+  }
+
+  .login-card h2 {
+    font-size: 1.5rem;
+  }
+
+  .form-control {
+    padding: 12px 14px;
+    font-size: 0.95rem;
+  }
+
+  .btn-primary {
+    padding: 12px;
+    font-size: 0.95rem;
+  }
+}

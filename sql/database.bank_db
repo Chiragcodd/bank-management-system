@@ -1,0 +1,41 @@
+USE bank_db;
+
+-- Users Table
+CREATE TABLE IF NOT EXISTS users (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    username VARCHAR(50) NOT NULL UNIQUE,
+    password VARCHAR(100) NOT NULL,
+    full_name VARCHAR(100),
+    email VARCHAR(100),
+    mobile_number VARCHAR(10),
+    verified BOOLEAN DEFAULT FALSE
+);
+
+-- Accounts Table
+CREATE TABLE IF NOT EXISTS accounts (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    account_number VARCHAR(20) NOT NULL UNIQUE,
+    balance DOUBLE DEFAULT 0,
+    account_type VARCHAR(20),
+    user_id BIGINT,
+    FOREIGN KEY (user_id) REFERENCES users(id)
+);
+
+-- Transactions Table
+CREATE TABLE IF NOT EXISTS transactions (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    type VARCHAR(20), -- DEPOSIT / WITHDRAW
+    amount DOUBLE,
+    date_time DATETIME,
+    account_id BIGINT,
+    FOREIGN KEY (account_id) REFERENCES accounts(id)
+);
+
+-- OTP Verification Table
+CREATE TABLE IF NOT EXISTS otp_verification (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    mobile_number VARCHAR(10),
+    otp VARCHAR(10),
+    expiry_time DATETIME,
+    used BOOLEAN DEFAULT FALSE
+);
