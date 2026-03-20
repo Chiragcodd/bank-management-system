@@ -2,7 +2,6 @@ package com.example.bank_management_system.dto;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
-import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -10,13 +9,9 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class OtpRequest {
+public class ResendOtpRequest {
 
     @NotBlank(message = "Mobile number is required")
     @Pattern(regexp = "\\d{10}", message = "Mobile number must be 10 digits")
     private String mobileNumber;
-
-    @NotBlank(message = "OTP is required")
-    @Size(min = 6, max = 6, message = "OTP must be 6 digits")
-    private String otp;
 }

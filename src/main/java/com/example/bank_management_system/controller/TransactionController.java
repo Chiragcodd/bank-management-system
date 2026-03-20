@@ -1,12 +1,13 @@
 package com.example.bank_management_system.controller;
 
-import com.example.bank_management_system.entity.Transaction;
-import com.example.bank_management_system.dto.*;
+import com.example.bank_management_system.dto.ApiResponse;
+import com.example.bank_management_system.dto.TransactionDto;
 import com.example.bank_management_system.service.TransactionService;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/transactions")
@@ -19,18 +20,21 @@ public class TransactionController {
         this.transactionService = transactionService;
     }
 
-    @GetMapping("/{accountId}")
-    public ApiResponse<List<TransactionDto>> getTransactions(@PathVariable Long accountId) {
+    @GetMapping("/my")
+    public ApiResponse<List<TransactionDto>> getMyTransactions(Authentication authentication) {
 
-        List<Transaction> list = transactionService.getTransactionsByAccountId(accountId);
-        List<TransactionDto> dtoList = list.stream()
-            .map(tx -> new TransactionDto(
-                    tx.getType() != null ? tx.getType().name() : "UNKNOWN",
-                    tx.getAmount(),
-                    tx.getDateTime(),
-                    tx.getStatus() != null ? tx.getStatus().name() : "PENDING"
-            ))
-            .collect(Collectors.toList());
-        return new ApiResponse<>(true, "Transaction history", dtoList);
+        String username = authentication.getName();
+        List<TransactionDto> transactions = transactionService.getMyTransactions(username);
+        return new ApiResponse<>(true, "Transaction history", transactions);
+    }
+
+    @GetMapping("/admin/{accountId}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ApiResponse<List<TransactionDto>> getTransactionsByAccountId(
+            @PathVariable Long accountId) {
+
+        List<TransactionDto> transactions =
+                transactionService.getTransactionsByAccountId(accountId);
+        return new ApiResponse<>(true, "Transaction history", transactions);
     }
 }

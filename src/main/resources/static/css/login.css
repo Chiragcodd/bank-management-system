@@ -1,317 +1,228 @@
-/* ---------- Global Reset ---------- 
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-  font-family: "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+/* ===== LOGIN.CSS — Welcome Bank ===== 
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700&family=DM+Sans:wght@300;400;500;600&display=swap'); */
+
+/* ── Root Variables ── */
+:root {
+  --navy:       #0a1628;
+  --navy-mid:   #0f2044;
+  --navy-light: #1a3260;
+  --gold:       #c9a84c;
+  --gold-light: #e8c96a;
+  --gold-pale:  #f5e6b8;
+  --white:      #ffffff;
+  --muted:      #8a9bbf;
+  --card-bg:    rgba(15, 32, 68, 0.72);
+  --border:     rgba(201, 168, 76, 0.25);
+  --shadow:     0 32px 80px rgba(0,0,0,0.55);
+  --radius:     18px;
+  --transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* ---------- Background with Image ---------- 
-.bank-bg {
+/* ── Reset & Base ── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body.bank-bg {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--navy);
+  background-image:
+    radial-gradient(ellipse 80% 60% at 20% 10%, rgba(201,168,76,0.10) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 80% at 80% 90%, rgba(26,50,96,0.80) 0%, transparent 60%),
+    repeating-linear-gradient(
+      45deg,
+      transparent,
+      transparent 60px,
+      rgba(255,255,255,0.013) 60px,
+      rgba(255,255,255,0.013) 61px
+    );
   min-height: 100vh;
-  background: 
-    url('../image/bg.jpg') no-repeat center center / cover; 
-  display: flex;
-  align-items: center;
-  justify-content: center;
   position: relative;
   overflow: hidden;
 }
 
-
-/* soft animated blobs *
-.bank-bg::before,
-.bank-bg::after {
-  content: "";
-  position: absolute;
-  width: 380px;
-  height: 380px;
+/* ── Ambient Orbs ── */
+body.bank-bg::before,
+body.bank-bg::after {
+  content: '';
+  position: fixed;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.12);
   filter: blur(80px);
+  pointer-events: none;
+  z-index: 0;
+}
+body.bank-bg::before {
+  width: 520px; height: 520px;
+  top: -140px; left: -140px;
+  background: radial-gradient(circle, rgba(201,168,76,0.13) 0%, transparent 70%);
+  animation: orb-drift 14s ease-in-out infinite alternate;
+}
+body.bank-bg::after {
+  width: 400px; height: 400px;
+  bottom: -100px; right: -100px;
+  background: radial-gradient(circle, rgba(26,50,96,0.60) 0%, transparent 70%);
+  animation: orb-drift 18s ease-in-out infinite alternate-reverse;
+}
+@keyframes orb-drift {
+  0%   { transform: translate(0, 0) scale(1); }
+  100% { transform: translate(40px, 30px) scale(1.1); }
 }
 
-.bank-bg::before {
-  top: -120px;
-  left: -120px;
-}
-
-.bank-bg::after {
-  bottom: -120px;
-  right: -120px;
-}
-
-/* ---------- Login Card (Glass Effect) ---------- *
+/* ── Card ── */
 .login-card {
+  position: relative;
+  z-index: 1;
+  background: var(--card-bg);
+  backdrop-filter: blur(24px) saturate(1.4);
+  -webkit-backdrop-filter: blur(24px) saturate(1.4);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow), inset 0 1px 0 rgba(255,255,255,0.08);
   width: 100%;
   max-width: 420px;
-  padding: 2.2rem;
-  background: rgba(255, 255, 255, 0.92);
-  border-radius: 18px;
-  backdrop-filter: blur(12px);
-  box-shadow:
-    0 25px 50px rgba(0, 0, 0, 0.25),
-    inset 0 1px 0 rgba(255, 255, 255, 0.6);
-  animation: cardFade 0.7s ease;
-  z-index: 1;
+  padding: 2.6rem 2.4rem 2.4rem !important;
+  animation: card-rise 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+@keyframes card-rise {
+  from { opacity: 0; transform: translateY(32px) scale(0.97); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
 }
 
-/* ---------- Headings ---------- 
-.login-card h2 {
-  font-size: 1.7rem;
-  color: #0d6efd;
-}
-
-.login-card p {
-  font-size: 0.95rem;
-  color: #6c757d;
-}
-
-/* ---------- Form Labels ---------- 
-.form-label {
-  font-size: 0.85rem;
-  font-weight: 600;
-  color: #495057;
-}
-
-/* ---------- Inputs ---------- 
-.form-control {
-  border-radius: 12px;
-  padding: 12px 14px;
-  border: 1px solid #dee2e6;
-  background-color: #f8f9fa;
-  transition: all 0.25s ease;
-}
-
-.form-control::placeholder {
-  color: #adb5bd;
-}
-
-.form-control:focus {
-  background-color: #ffffff;
-  border-color: #0d6efd;
-  box-shadow: 0 0 0 4px rgba(13, 110, 253, 0.18);
-}
-
-/* ---------- Login Button ---------- 
-.btn-primary {
-  margin-top: 0.5rem;
-  border-radius: 14px;
-  padding: 12px;
-  font-weight: 600;
-  font-size: 0.95rem;
-  letter-spacing: 0.4px;
-  background: linear-gradient(135deg, #0d6efd, #084298);
-  border: none;
-  transition: all 0.25s ease;
-}
-
-.btn-primary:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 10px 20px rgba(13, 110, 253, 0.35);
-}
-
-/* ---------- Signup Link ---------- 
-.login-card a {
-  color: #0d6efd;
-  text-decoration: none;
-  font-weight: 600;
-}
-
-.login-card a:hover {
-  text-decoration: underline;
-}
-
-/* ---------- Animation ---------- 
-@keyframes cardFade {
-  from {
-    opacity: 0;
-    transform: translateY(30px) scale(0.97);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
-}
-
-/* ---------- Mobile ---------- 
-@media (max-width: 480px) {
-  .login-card {
-    padding: 1.8rem;
-    border-radius: 16px;
-  }
-
-  .login-card h2 {
-    font-size: 1.5rem;
-  }
-}
-*/
-
-/* ---------- Global Reset ---------- */
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-  font-family: "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
-}
-
-/* ---------- Background with Image + Overlay ---------- */
-.bank-bg {
-  min-height: 100vh;
-  background: 
-    linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.3)),
-    url('../image/bg.jpg') no-repeat center center / cover;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  position: relative;
-  overflow: hidden;
-}
-
-/* ---------- Soft animated blobs ---------- */
-.bank-bg::before,
-.bank-bg::after {
-  content: "";
+/* Gold top accent line */
+.login-card::before {
+  content: '';
   position: absolute;
-  width: 400px;
-  height: 400px;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.12);
-  filter: blur(90px);
-  animation: floatBlob 8s ease-in-out infinite alternate;
+  top: 0; left: 10%; right: 10%;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--gold), transparent);
+  border-radius: 2px;
 }
 
-.bank-bg::before {
-  top: -150px;
-  left: -150px;
-}
-
-.bank-bg::after {
-  bottom: -150px;
-  right: -150px;
-}
-
-@keyframes floatBlob {
-  0% { transform: translateY(0) rotate(0deg); }
-  50% { transform: translateY(25px) rotate(45deg); }
-  100% { transform: translateY(0) rotate(0deg); }
-}
-
-/* ---------- Login Card (Glass Effect) ---------- */
-.login-card {
-  width: 100%;
-  max-width: 480px;
-  padding: 3rem;
-  background: rgba(255, 255, 255, 0.87);
-  border-radius: 24px;
-  backdrop-filter: blur(16px);
-  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.28);
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  animation: cardFade 0.7s ease;
-  z-index: 1;
-  text-align: center;
-}
-
-/* ---------- Headings ---------- */
+/* ── Heading ── */
 .login-card h2 {
-  font-size: 2rem;
-  color: #0d6efd;
-  margin-bottom: 0.6rem;
+  font-family: 'Playfair Display', serif !important;
+  font-size: 1.75rem !important;
+  font-weight: 700 !important;
+  color: var(--gold-light) !important;
+  letter-spacing: 0.01em;
+  margin-bottom: 0.3rem !important;
+}
+.login-card .text-muted  { color: var(--muted) !important; font-size: 0.875rem; font-weight: 300; }
+.login-card .text-primary { color: var(--gold-light) !important; }
+
+/* ── Labels ── */
+.login-card .form-label {
+  color: var(--gold-pale) !important;
+  font-size: 0.8rem !important;
+  font-weight: 500 !important;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  margin-bottom: 0.45rem;
 }
 
-.login-card p {
-  font-size: 1rem;
-  color: #6c757d;
-  margin-bottom: 2rem;
-}
-
-/* ---------- Form Labels ---------- */
-.form-label {
+/* ── Inputs ── */
+.login-card .form-control {
+  background: rgba(255,255,255,0.06) !important;
+  border: 1px solid rgba(201,168,76,0.22) !important;
+  border-radius: 10px !important;
+  color: var(--white) !important;
+  font-family: 'DM Sans', sans-serif;
   font-size: 0.9rem;
-  font-weight: 600;
-  color: #495057;
-  display: block;
-  margin-bottom: 0.4rem;
+  padding: 0.65rem 1rem !important;
+  transition: border-color var(--transition), box-shadow var(--transition), background var(--transition);
 }
-
-/* ---------- Inputs ---------- */
-.form-control {
-  width: 100%;
-  border-radius: 14px;
-  padding: 15px 16px;
-  border: 1px solid rgba(255,255,255,0.5);
-  background-color: rgba(255,255,255,0.92);
-  font-size: 1rem;
-  transition: all 0.3s ease;
+.login-card .form-control::placeholder {
+  color: rgba(138,155,191,0.55) !important;
+  font-weight: 300;
 }
-
-.form-control::placeholder {
-  color: #adb5bd;
-}
-
-.form-control:focus {
-  background-color: rgba(255,255,255,1);
-  border-color: #0d6efd;
-  box-shadow: 0 0 20px rgba(13,110,253,0.35);
+.login-card .form-control:focus {
+  background: rgba(255,255,255,0.10) !important;
+  border-color: var(--gold) !important;
+  box-shadow: 0 0 0 3px rgba(201,168,76,0.18) !important;
   outline: none;
 }
 
-/* ---------- Login Button ---------- */
-.btn-primary {
-  margin-top: 1rem;
-  border-radius: 18px;
-  padding: 15px;
-  font-weight: 600;
-  font-size: 1rem;
-  background: linear-gradient(135deg, #0d6efd, #084298);
-  border: none;
-  box-shadow: 0 6px 18px rgba(13,110,253,0.25);
-  transition: all 0.3s ease;
-  cursor: pointer;
+/* ── Submit Button ── */
+.login-card .btn-primary {
+  background: linear-gradient(135deg, var(--gold) 0%, #a8872a 100%) !important;
+  border: none !important;
+  border-radius: 10px !important;
+  color: var(--navy) !important;
+  font-family: 'DM Sans', sans-serif;
+  font-weight: 700 !important;
+  font-size: 0.95rem;
+  letter-spacing: 0.05em;
+  padding: 0.75rem !important;
+  box-shadow: 0 4px 20px rgba(201,168,76,0.35);
+  transition: transform var(--transition), box-shadow var(--transition), filter var(--transition);
+  position: relative;
+  overflow: hidden;
+}
+.login-card .btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 28px rgba(201,168,76,0.50);
+  filter: brightness(1.08);
+}
+.login-card .btn-primary:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 10px rgba(201,168,76,0.30);
 }
 
-.btn-primary:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 12px 30px rgba(13,110,253,0.45);
-}
-
-/* ---------- Signup Link ---------- */
-.login-card a {
-  color: #0d6efd;
+/* ── Footer Link ── */
+.login-card p.mt-3 { color: var(--muted) !important; font-size: 0.85rem; }
+.login-card a.text-primary,
+.login-card a.fw-semibold {
+  color: var(--gold-light) !important;
   text-decoration: none;
-  font-weight: 600;
-  transition: all 0.3s ease;
+  border-bottom: 1px solid rgba(201,168,76,0.35);
+  padding-bottom: 1px;
+  transition: color var(--transition), border-color var(--transition);
 }
+.login-card a:hover { color: var(--gold-pale) !important; border-color: var(--gold-pale); }
 
-.login-card a:hover {
-  text-decoration: underline;
-}
-
-/* ---------- Animation ---------- */
-@keyframes cardFade {
-  from { opacity: 0; transform: translateY(-60px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-/* ---------- Media Query: Mobile ---------- */
+/* ── Responsive ── */
 @media (max-width: 480px) {
-  .login-card {
-    max-width: 95%;
-    padding: 2rem;
-    border-radius: 16px;
-  }
+  .login-card { padding: 2rem 1.4rem 1.8rem !important; margin: 1rem; }
+  .login-card h2 { font-size: 1.45rem !important; }
+}
 
-  .login-card h2 {
-    font-size: 1.5rem;
-  }
+/* ── Alert Banner ── */
+.alert-banner {
+  border-radius: 10px;
+  padding: 0.65rem 1rem;
+  font-size: 0.83rem;
+  margin-bottom: 1rem;
+  display: none;
+  text-align: left;
+}
+.alert-banner.error {
+  background: rgba(239,68,68,0.12);
+  border: 1px solid rgba(239,68,68,0.35);
+  color: #f87171;
+  display: block;
+}
+.alert-banner.success {
+  background: rgba(34,197,94,0.10);
+  border: 1px solid rgba(34,197,94,0.35);
+  color: #4ade80;
+  display: block;
+}
 
-  .form-control {
-    padding: 12px 14px;
-    font-size: 0.95rem;
-  }
+/* ── Inline field error ── */
+.err-msg {
+  font-size: 0.78rem;
+  color: #f87171;
+  margin-top: 0.3rem;
+  display: none;
+}
+.err-msg.show { display: block; }
 
-  .btn-primary {
-    padding: 12px;
-    font-size: 0.95rem;
-  }
+/* ── Invalid field border ── */
+.login-card .form-control.is-invalid {
+  border-color: #ef4444 !important;
+  box-shadow: 0 0 0 3px rgba(239,68,68,0.18) !important;
+}
+
+/* ── Loading button ── */
+.btn-loading {
+  opacity: 0.7;
+  pointer-events: none;
 }

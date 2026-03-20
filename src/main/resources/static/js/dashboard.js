@@ -1,193 +1,269 @@
 document.addEventListener("DOMContentLoaded", async () => {
-  const user = JSON.parse(localStorage.getItem("user"));
-  console.log("User from localStorage:", user);
 
-  if (!user) {
-    console.warn("User not logged in, redirecting to login.html");
-    window.location.href = "login.html";
+  const user    = JSON.parse(localStorage.getItem("user"));
+  const token   = localStorage.getItem("token");
+  const baseUrl = "http://localhost:8080";
+
+  if (!user || !token || user.role !== "USER") {
+
+    showToast("Access denied! Redirecting to login...", "danger");
+    setTimeout(() => window.location.href = "login.html", 1500);
     return;
   }
 
-  const baseUrl = "http://localhost:8080";
-
   document.getElementById("username").textContent = user.username || "N/A";
-  document.getElementById("fullName").textContent = user.fullName || "N/A";
+  document.getElementById("fullName").textContent  = user.fullName || "N/A";
 
   async function loadAccount() {
     try {
-      console.log(`Fetching account for userId=${user.id}`);
-      const res = await fetch(`${baseUrl}/api/account/${user.id}`);
-      console.log("Account fetch raw response:", res);
+      const res     = await fetch(`${baseUrl}/api/account/me`, {
+        headers: { "Authorization": `Bearer ${token}` }
+      });
       const resData = await res.json();
-      console.log("Account fetch response JSON:", resData);
 
       if (!resData.success || !resData.data) {
-        alert("Failed to load account: " + (resData.message || "No data returned"));
+
+        showToast("Failed to load account: " + (resData.message || "Unknown error"), "danger");
         return;
       }
 
       const account = resData.data;
-      if (!account.id) console.error("Account ID is undefined! This will break transaction loading.");
-
-      document.getElementById("balance").textContent = (account.balance || 0).toFixed(2);
+      document.getElementById("balance").textContent       = (account.balance || 0).toFixed(2);
       document.getElementById("accountNumber").textContent = account.accountNumber || "N/A";
       localStorage.setItem("account", JSON.stringify(account));
-
-      loadTransactions(account.id);
+      loadTransactions();
 
     } catch (err) {
       console.error("Error loading account:", err);
-      alert("Server error while loading account. Check console.");
+
+      showToast("Server error while loading account.", "danger");
     }
   }
 
-  async function loadTransactions(accountId) {
-    if (!accountId) {
-      console.error("Cannot load transactions: accountId undefined");
+  async function loadTransactions() {
+    try {
+      const res     = await fetch(`${baseUrl}/api/account/transactions`, {
+        headers: { "Authorization": `Bearer ${token}` }
+      });
+      const resData = await res.json();
+
+      if (!resData.success || !resData.data) {
+        document.getElementById("transactionTable").innerHTML =
+          `<tr><td colspan="5" class="text-center text-muted">No transactions yet</td></tr>`;
+        return;
+      }
+
+      localStorage.setItem("lastTransactions", JSON.stringify(resData.data));
+      renderTransactions(resData.data);
+
+    } catch (err) {
+      console.error("Error loading transactions:", err);
+    }
+  }
+
+  function renderTransactions(data) {
+    const table      = document.getElementById("transactionTable");
+    const searchTerm = document.getElementById("searchTransaction").value.toLowerCase();
+
+    const filtered = data.filter(t =>
+      t.type?.toLowerCase().includes(searchTerm) ||
+      t.amount?.toString().includes(searchTerm) ||
+      t.counterpartyAccount?.toLowerCase().includes(searchTerm)
+    );
+
+    if (filtered.length === 0) {
+      table.innerHTML = `<tr><td colspan="5" class="text-center text-muted py-3">No transactions found</td></tr>`;
+      return;
+    }
+
+    table.innerHTML = filtered.map(t => {
+      let typeLabel, typeBadge, counterpartyHtml = "-";
+
+      if (t.type === "DEPOSIT") {
+        typeLabel = "⬇️ DEPOSIT";
+        typeBadge = "bg-success";
+      } else if (t.type === "WITHDRAW") {
+        typeLabel = "⬆️ WITHDRAW";
+        typeBadge = "bg-danger";
+      } else if (t.type === "TRANSFER") {
+        if (t.direction === "SENT") {
+          typeLabel        = "🔴 TRANSFER SENT";
+          typeBadge        = "bg-danger";
+          counterpartyHtml = `<small class="text-muted">To:</small> <strong>${t.counterpartyAccount}</strong>`;
+        } else if (t.direction === "RECEIVED") {
+          typeLabel        = "🟢 TRANSFER RECEIVED";
+          typeBadge        = "bg-success";
+          counterpartyHtml = `<small class="text-muted">From:</small> <strong>${t.counterpartyAccount}</strong>`;
+        } else {
+          typeLabel = "🔄 TRANSFER";
+          typeBadge = "bg-primary";
+          if (t.counterpartyAccount)
+            counterpartyHtml = `<strong>${t.counterpartyAccount}</strong>`;
+        }
+      }
+
+      return `
+        <tr>
+          <td>${t.dateTime ? new Date(t.dateTime).toLocaleString() : "N/A"}</td>
+          <td><span class="badge ${typeBadge}">${typeLabel}</span></td>
+          <td class="fw-bold">₹${t.amount?.toFixed(2) || "0.00"}</td>
+          <td>${counterpartyHtml}</td>
+          <td><span class="badge ${t.status === "SUCCESS" ? "bg-success" : "bg-warning"}">${t.status || "N/A"}</span></td>
+        </tr>
+      `;
+    }).join("");
+  }
+
+  const txPanel     = document.getElementById("txPanel");
+  const txToggleBtn = document.getElementById("txToggleBtn");
+
+  txToggleBtn.addEventListener("click", () => {
+    const isVisible = txPanel.style.display === "block";
+    if (isVisible) {
+      txPanel.style.display = "none";
+      txToggleBtn.classList.remove("active");
+      txToggleBtn.textContent = "📋 Transaction History";
+    } else {
+      txPanel.style.display = "block";
+      txToggleBtn.classList.add("active");
+      txToggleBtn.textContent = "✖ Close History";
+      loadTransactions();
+    }
+  });
+  async function performTransaction(endpoint, amount) {
+
+    if (!amount || amount <= 0) {
+      showToast("Enter a valid amount", "warning");
       return;
     }
 
     try {
-      console.log(`Fetching transactions for accountId=${accountId}`);
-      const res = await fetch(`${baseUrl}/api/transactions/${accountId}`);
-      const resData = await res.json();
-      console.log("Transactions fetch response:", resData);
+      const res = await fetch(`${baseUrl}/api/account/${endpoint}`, {
+        method:  "POST",
+        headers: {
+          "Content-Type":  "application/json",
+          "Authorization": `Bearer ${token}`
+        },
+        body: JSON.stringify({ amount })
+      });
 
-      if (!resData.success || !resData.data) {
-        alert("Failed to load transactions: " + (resData.message || "No data returned"));
+      const resData = await res.json();
+
+      if (!resData.success) {
+
+        showToast(resData.message || `${endpoint} failed`, "danger");
         return;
       }
 
-      const data = resData.data;
-      const table = document.getElementById("transactionTable");
-      table.innerHTML = "";
-
-      const searchTerm = document.getElementById("searchTransaction").value.toLowerCase();
-
-      data
-        .filter(t => t.type?.toLowerCase().includes(searchTerm) || t.amount?.toString().includes(searchTerm))
-        .forEach(t => {
-          const row = document.createElement("tr");
-          row.innerHTML = `
-            <td>${t.dateTime ? new Date(t.dateTime).toLocaleString() : "N/A"}</td>
-            <td>${t.type || "N/A"}</td>
-            <td>₹${t.amount?.toFixed(2) || 0}</td>
-          `;
-          table.appendChild(row);
-        });
+      showToast(
+        `${endpoint.charAt(0).toUpperCase() + endpoint.slice(1)} of ₹${amount.toFixed(2)} successful!`,
+        "success"
+      );
+      document.getElementById(`${endpoint}Amount`).value = "";
+      loadAccount();
 
     } catch (err) {
-      console.error("Error loading transactions:", err);
-      alert("Server error while loading transactions. Check console.");
+      console.error(err);
+
+      showToast("Server error. Make sure backend is running.", "danger");
     }
   }
 
-  // Deposit
- document.getElementById("depositBtn").addEventListener("click", async () => {
-  const amount = parseFloat(document.getElementById("depositAmount").value);
-  if (!amount) return alert("Enter a valid amount");
+  document.getElementById("depositBtn").addEventListener("click", () => {
+    performTransaction("deposit", parseFloat(document.getElementById("depositAmount").value));
+  });
 
-  const user = JSON.parse(localStorage.getItem("user")); // Logged-in user
+  document.getElementById("withdrawBtn").addEventListener("click", () => {
+    performTransaction("withdraw", parseFloat(document.getElementById("withdrawAmount").value));
+  });
 
-  const requestBody = {
-    userId: user.id,
-    amount: amount
-  };
+  document.getElementById("transferBtn").addEventListener("click", async () => {
+    const toAccountNumber = document.getElementById("transferAccount").value.trim();
+    const amount          = parseFloat(document.getElementById("transferAmount").value);
 
-  try {
-    console.log(`Depositing amount=${amount} for userId=${user.id}`);
+    if (!toAccountNumber) { showToast("Enter receiver account number", "warning"); return; }
+    if (!amount || amount <= 0) { showToast("Enter a valid amount", "warning"); return; }
 
-    const res = await fetch(`${baseUrl}/api/account/deposit`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(requestBody)
-    });
+    try {
+      const res = await fetch(`${baseUrl}/api/account/transfer`, {
+        method:  "POST",
+        headers: {
+          "Content-Type":  "application/json",
+          "Authorization": `Bearer ${token}`
+        },
+        body: JSON.stringify({ toAccountNumber, amount })
+      });
 
-    const resData = await res.json();
-    console.log("Deposit response:", resData);
+      const resData = await res.json();
 
-    if (!resData.success) {
-      alert("Deposit failed: " + (resData.message || "Unknown error"));
-      return;
+      if (!resData.success) {
+
+        showToast(resData.message || "Transfer failed", "danger");
+        return;
+      }
+
+      showToast(`₹${amount.toFixed(2)} transferred to ${toAccountNumber} successfully!`, "success");
+      document.getElementById("transferAccount").value = "";
+      document.getElementById("transferAmount").value  = "";
+      loadAccount();
+
+    } catch (err) {
+      console.error(err);
+      showToast("Server error during transfer.", "danger");
     }
+  });
 
-    alert("Deposit successful!");
-    document.getElementById("depositAmount").value = "";
-    loadAccount(); // refresh balance
+  const logoutModal      = document.getElementById("logoutModal");
+  const cancelLogoutBtn  = document.getElementById("cancelLogoutBtn");
+  const confirmLogoutBtn = document.getElementById("confirmLogoutBtn");
 
-  } catch (err) {
-    console.error("Deposit error:", err);
-    alert("Server error during deposit.");
-  }
-});
-
-
- document.getElementById("withdrawBtn").addEventListener("click", async () => {
-  const amount = parseFloat(document.getElementById("withdrawAmount").value);
-  if (!amount) return alert("Enter a valid amount");
-
-  const user = JSON.parse(localStorage.getItem("user")); // Logged-in user
-
-  const requestBody = {
-    userId: user.id,
-    amount: amount
-  };
-
-  try {
-    console.log(`Withdrawing amount=${amount} for userId=${user.id}`);
-
-    const res = await fetch(`${baseUrl}/api/account/withdraw`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(requestBody)
-    });
-
-    const resData = await res.json();
-    console.log("Withdraw response:", resData);
-
-    if (!resData.success) {
-      alert("Withdraw failed: " + (resData.message || "Unknown error"));
-      return;
-    }
-
-    alert("Withdraw successful!");
-    document.getElementById("withdrawAmount").value = "";
-    loadAccount(); // refresh balance
-
-  } catch (err) {
-    console.error("Withdraw error:", err);
-    alert("Server error during withdraw.");
-  }
-});
-
-
-// Logout
   document.getElementById("logoutBtn").addEventListener("click", () => {
-    if (confirm("Are you sure you want to logout?")) {
-      localStorage.clear();
-      window.location.href = "login.html";
-    }
+    logoutModal.classList.add("show");
+  });
+  cancelLogoutBtn.addEventListener("click", () => {
+    logoutModal.classList.remove("show");
+  });
+  logoutModal.addEventListener("click", (e) => {
+    if (e.target === logoutModal) logoutModal.classList.remove("show");
+  });
+  confirmLogoutBtn.addEventListener("click", () => {
+    localStorage.clear();
+    window.location.href = "login.html";
   });
 
-// Copy account number
   document.getElementById("copyAccBtn").addEventListener("click", () => {
-    const accNumber = document.getElementById("accountNumber").textContent;
-    navigator.clipboard.writeText(accNumber);
-    alert("Account number copied!");
+    navigator.clipboard.writeText(document.getElementById("accountNumber").textContent);
+    showToast("Account number copied!", "info");
   });
 
-// Theme toggle
-  const themeToggle = document.getElementById("themeToggle");
-  themeToggle.addEventListener("click", () => {
+  document.getElementById("themeToggle").addEventListener("click", () => {
     document.body.classList.toggle("dark-theme");
-    themeToggle.textContent = document.body.classList.contains("dark-theme") ? "☀️" : "🌙";
+    document.getElementById("themeToggle").textContent =
+      document.body.classList.contains("dark-theme") ? "☀️" : "🌙";
   });
 
-// Search filter
   document.getElementById("searchTransaction").addEventListener("input", () => {
-    const account = JSON.parse(localStorage.getItem("account"));
-    if (account) loadTransactions(account.id);
+    const stored = localStorage.getItem("lastTransactions");
+    if (stored) renderTransactions(JSON.parse(stored));
   });
+
+  function showToast(message, type = "success") {
+    const toastEl   = document.getElementById("liveToast");
+    const toastBody = document.getElementById("toastBody");
+
+    const colorMap = {
+      success: "bg-success",
+      danger:  "bg-danger",
+      warning: "bg-warning",
+      info:    "bg-info"
+    };
+
+    toastEl.className   = `toast align-items-center text-white ${colorMap[type] || "bg-success"} border-0`;
+    toastBody.textContent = message;
+
+    const toast = new bootstrap.Toast(toastEl, { delay: 3500 });
+    toast.show();
+  }
 
   loadAccount();
 });

@@ -1,4 +1,4 @@
-package com.example.bank_management_system.config;
+package com.example.bank_management_system.security;
 
 import com.example.bank_management_system.entity.User;
 import com.example.bank_management_system.repository.UserRepository;
@@ -10,8 +10,8 @@ public class CustomUserDetailsService implements UserDetailsService {
 
     private final UserRepository userRepository;
 
-    public CustomUserDetailsService(UserRepository userRepository) {
-        this.userRepository = userRepository;
+    public CustomUserDetailsService(UserRepository u) {
+        this.userRepository = u;
     }
 
     @Override
@@ -19,11 +19,11 @@ public class CustomUserDetailsService implements UserDetailsService {
             throws UsernameNotFoundException {
 
         User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+                .orElseThrow(() ->
+                        new UsernameNotFoundException("User not found"));
 
         return org.springframework.security.core.userdetails.User
-                .builder()
-                .username(user.getUsername())
+                .withUsername(user.getUsername())
                 .password(user.getPassword())
                 .roles(user.getRole().name())
                 .build();

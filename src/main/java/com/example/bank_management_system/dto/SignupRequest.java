@@ -4,9 +4,11 @@ import com.example.bank_management_system.entity.enums.AccountType;
 import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
 @AllArgsConstructor
+@NoArgsConstructor
 public class SignupRequest {
 
     @NotBlank(message = "Username is required")
