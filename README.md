@@ -194,4 +194,4 @@ App will start at: **http://localhost:8080**
 
 - OTP is printed to the **server console/terminal** (development mode)
 - `application.properties` is excluded from git — secrets are safe
-- All financial amounts use `BigDecimal` — no floating point errors
+- All financial amounts use `BigDecimal` — no floating point errors.
