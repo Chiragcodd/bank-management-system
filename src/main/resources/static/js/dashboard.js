@@ -14,11 +14,24 @@ document.addEventListener("DOMContentLoaded", async () => {
   document.getElementById("username").textContent = user.username || "N/A";
   document.getElementById("fullName").textContent  = user.fullName || "N/A";
 
+  function handleUnauthorized() {
+    showToast("Session expired. Please login again.", "warning");
+    setTimeout(() => {
+      localStorage.clear();
+      window.location.href = "login.html";
+    }, 1500);
+  }
+
   async function loadAccount() {
     try {
       const res     = await fetch(`${baseUrl}/api/account/me`, {
         headers: { "Authorization": `Bearer ${token}` }
       });
+
+      if (res.status === 401) { handleUnauthorized(); 
+        return; 
+      }
+
       const resData = await res.json();
 
       if (!resData.success || !resData.data) {
@@ -45,6 +58,11 @@ document.addEventListener("DOMContentLoaded", async () => {
       const res     = await fetch(`${baseUrl}/api/account/transactions`, {
         headers: { "Authorization": `Bearer ${token}` }
       });
+
+      if (res.status === 401) { handleUnauthorized(); 
+        return; 
+      }
+
       const resData = await res.json();
 
       if (!resData.success || !resData.data) {
@@ -147,10 +165,13 @@ document.addEventListener("DOMContentLoaded", async () => {
         body: JSON.stringify({ amount })
       });
 
+      if (res.status === 401) { handleUnauthorized(); 
+        return; 
+      }
+
       const resData = await res.json();
 
       if (!resData.success) {
-
         showToast(resData.message || `${endpoint} failed`, "danger");
         return;
       }
@@ -193,6 +214,10 @@ document.addEventListener("DOMContentLoaded", async () => {
         },
         body: JSON.stringify({ toAccountNumber, amount })
       });
+
+      if (res.status === 401) { handleUnauthorized(); 
+        return; 
+      }
 
       const resData = await res.json();
 

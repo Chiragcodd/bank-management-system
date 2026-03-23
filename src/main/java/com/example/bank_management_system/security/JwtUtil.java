@@ -8,6 +8,7 @@ import jakarta.annotation.PostConstruct;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
+import java.nio.charset.StandardCharsets;
 import java.util.Date;
 
 @Component
@@ -21,7 +22,8 @@ public class JwtUtil {
 
     @PostConstruct
     public void validateSecret() {
-        if (jwtProperties.getSecret() == null || jwtProperties.getSecret().length() < 32) {
+        if (jwtProperties.getSecret() == null ||
+            jwtProperties.getSecret().length() < 32) {
             throw new IllegalStateException(
                 "jwt.secret must be at least 32 characters. Check application.properties."
             );
@@ -29,26 +31,26 @@ public class JwtUtil {
     }
 
     private SecretKey getSignKey() {
-        return Keys.hmacShaKeyFor(jwtProperties.getSecret().getBytes());
+        return Keys.hmacShaKeyFor(
+            jwtProperties.getSecret().getBytes(StandardCharsets.UTF_8)
+        );
     }
 
     public String generateToken(User user) {
         return Jwts.builder()
                 .setSubject(user.getUsername())
-                .claim("role", user.getRole().name())
+                .claim("role",   user.getRole().name())
                 .claim("userId", user.getId())
                 .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + jwtProperties.getExpiration()))
+                .setExpiration(new Date(
+                    System.currentTimeMillis() + jwtProperties.getExpiration()
+                ))
                 .signWith(getSignKey(), SignatureAlgorithm.HS256)
                 .compact();
     }
 
     public String extractUsername(String token) {
         return getClaims(token).getSubject();
-    }
-
-    public Long extractUserId(String token) {
-        return getClaims(token).get("userId", Long.class);
     }
 
     public boolean validateToken(String token, String username) {

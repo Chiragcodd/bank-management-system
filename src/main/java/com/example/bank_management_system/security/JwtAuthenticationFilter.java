@@ -22,16 +22,17 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final JwtUtil jwtUtil;
     private final UserDetailsService userDetailsService;
 
-    public JwtAuthenticationFilter(JwtUtil jwtUtil, UserDetailsService userDetailsService) {
-        this.jwtUtil = jwtUtil;
-        this.userDetailsService = userDetailsService;
+    public JwtAuthenticationFilter(JwtUtil jwtUtil,
+                                   UserDetailsService userDetailsService) {
+        this.jwtUtil             = jwtUtil;
+        this.userDetailsService  = userDetailsService;
     }
 
     @Override
     protected void doFilterInternal(
-                @NonNull HttpServletRequest request,
+                @NonNull HttpServletRequest  request,
                 @NonNull HttpServletResponse response,
-                @NonNull FilterChain filterChain)
+                @NonNull FilterChain         filterChain)
             throws ServletException, IOException {
 
         final String authHeader = request.getHeader("Authorization");
@@ -47,7 +48,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         try {
             username = jwtUtil.extractUsername(token);
         } catch (Exception e) {
-            filterChain.doFilter(request, response);
+            sendUnauthorized(response, "Invalid token");
             return;
         }
 
@@ -57,7 +58,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             UserDetails userDetails = userDetailsService.loadUserByUsername(username);
 
             if (jwtUtil.validateToken(token, username)) {
-
                 UsernamePasswordAuthenticationToken authToken =
                         new UsernamePasswordAuthenticationToken(
                                 userDetails,
@@ -70,9 +70,22 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 );
 
                 SecurityContextHolder.getContext().setAuthentication(authToken);
+
+            } else {
+                sendUnauthorized(response, "Token expired or invalid");
+                return;
             }
         }
 
         filterChain.doFilter(request, response);
+    }
+
+    private void sendUnauthorized(HttpServletResponse response,
+                                  String message) throws IOException {
+        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+        response.setContentType("application/json");
+        response.getWriter().write(
+            "{\"success\":false,\"message\":\"" + message + "\"}"
+        );
     }
 }
